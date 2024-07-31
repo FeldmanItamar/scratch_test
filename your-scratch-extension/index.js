@@ -5,8 +5,11 @@ const TargetType = require('../../extension-support/target-type');
 class Scratch3YourExtension {
 
     constructor (runtime) {
-        // put any setup for your extension here
-    }
+        import('syllable')
+          .then((syllableModule) => {
+            this.syllable = syllableModule.syllable;
+          });
+      }
 
     /**
      * Returns the metadata about your extension.
@@ -14,7 +17,7 @@ class Scratch3YourExtension {
     getInfo () {
         return {
             // unique ID for your extension
-            id: 'yourScratchExtension',
+            id: 'yourScratchExtension2',
 
             // name that will be displayed in the Scratch UI
             name: 'Demo',
@@ -81,6 +84,46 @@ class Scratch3YourExtension {
                             type: ArgumentType.STRING
                         }
                     }
+                },
+                {
+                    // function where your code logic lives
+                    opcode: 'myFirstBlock2',
+            
+                    // type of block
+                    blockType: BlockType.REPORTER,
+            
+                    // label to display on the block
+                    text: 'Title for ISBN book [BOOK_NUMBER]',
+            
+                    // arguments used in the block
+                    arguments: {
+                      BOOK_NUMBER: {
+                        defaultValue: 1718500564,
+            
+                        // type/shape of the parameter
+                        type: ArgumentType.NUMBER
+                      }
+                    }
+                }, 
+                {
+                    // function where your code logic lives
+                    opcode: 'mySecondBlock',
+
+                    // type of block
+                    blockType: BlockType.REPORTER,
+
+                    // label to display on the block
+                    text: 'Syllables in [MY_TEXT]',
+
+                    // arguments used in the block
+                    arguments: {
+                    MY_TEXT: {
+                        defaultValue: 'Hello World',
+
+                        // type/shape of the parameter
+                        type: ArgumentType.STRING
+                    }
+                    }
                 }
             ]
         };
@@ -95,6 +138,25 @@ class Scratch3YourExtension {
         // example implementation to return a string
         return MY_STRING + ' : doubled would be ' + (MY_NUMBER * 2);
     }
+
+    myFirstBlock2 ({ BOOK_NUMBER }) {
+        return fetch('https://openlibrary.org/isbn/' + BOOK_NUMBER + '.json')
+          .then((response) => {
+            if (response.ok) {
+              return response.json();
+            }
+            else {
+              return { title: 'Unknown' };
+            }
+          })
+          .then((bookinfo) => {
+            return bookinfo.title;
+          });
+      }
+
+      mySecondBlock ({ MY_TEXT }) {
+        return this.syllable(MY_TEXT);
+      }
 }
 
 module.exports = Scratch3YourExtension;
